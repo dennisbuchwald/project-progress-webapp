@@ -1,95 +1,79 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import { useState, useEffect } from "react";
+import styles from "./page.module.css";
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+	const [projectNameQuery, setProjectNameQuery] = useState("");
+	const [selectedProject, setSelectedProject] = useState(null);
+	const [projects, setProjects] = useState([]);
+	const [notFound, setNotFound] = useState(false); // Neuer State
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+	useEffect(() => {
+		fetch("/projects.json")
+			.then((response) => response.json())
+			.then((data) => setProjects(data));
+	}, []);
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+	const handleProjectSearch = () => {
+		const project = projects.find(
+			(p) => p.name.toLowerCase() === projectNameQuery.toLowerCase()
+		);
+		if (project) {
+			setSelectedProject(project);
+			setNotFound(false);
+		} else {
+			setNotFound(true);
+			setSelectedProject(null);
+		}
+	};
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+	const handleFormSubmit = (e) => {
+		e.preventDefault();
+		handleProjectSearch();
+	};
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
+	if (!selectedProject) {
+		return (
+			<main className={styles.main}>
+				<h1 className={styles.headline}>Projektname eingeben:</h1>
+				<form onSubmit={handleFormSubmit} className={styles.formContainer}>
+					<section className={styles.inputS0ection}>
+						<input
+							className={styles.projectInput}
+							value={projectNameQuery}
+							onChange={(e) => setProjectNameQuery(e.target.value)}
+						/>
+						<div className={styles.tooltip}>
+							?
+							<span className={styles.tooltipText}>
+								Geben Sie den genauen Projektnamen ein. Ohne Leerzeichen. Groß-
+								und Kleinschreibung wird ignoriert.
+							</span>
+						</div>
+					</section>
+					<button className={styles.btn} type="submit">
+						Projekt suchen
+					</button>
+				</form>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+				{notFound && <p>Projekt nicht gefunden</p>}
+			</main>
+		);
+	}
+
+	return (
+		<main className={styles.main}>
+			<h1 lass={styles.headline}>{selectedProject.name}</h1>
+			<div className={styles.progressContainer}>
+				<div
+					className={styles.progressBar}
+					style={{ width: `${selectedProject.progress}%` }}
+				>
+					{selectedProject.progress}%
+				</div>
+			</div>
+			<p>{selectedProject.phase}</p>
+			<a href={selectedProject.link}>Link zum Projekt</a>
+		</main>
+	);
 }

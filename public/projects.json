@@ -1,0 +1,14 @@
+[
+	{
+		"name": "Bunkernacht",
+		"progress": 10,
+		"phase": "Entwicklungsphase",
+		"link": "https://bunkernacht-events.de"
+	},
+	{
+		"name": "dbwmedia",
+		"progress": 75,
+		"phase": "Testphase",
+		"link": "https://link-zum-projekt2.com"
+	}
+]
